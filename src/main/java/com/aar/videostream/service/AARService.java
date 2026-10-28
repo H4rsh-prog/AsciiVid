@@ -16,8 +16,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class AARService {
     final public char GRADIENT_ARRAY[] = " .,:;+*?%S#@".toCharArray();
-    
-    public char[][] generateAsciiArt(Mat image) {
+    final int fontFace = opencv_imgproc.FONT_HERSHEY_SIMPLEX;
+	final double fontScale = 0.1;
+	final Scalar fontColor = new Scalar(255, 255, 255, 0);
+	final int thickness = 1;
+	final int lineType = opencv_imgproc.LINE_8;
+    private FPSCounter fpsCounter;
+	
+	public char[][] generateAsciiArt(Mat image) {
     	int rows = image.rows();
     	int cols = image.cols();
     	char[][] ascii = new char[rows][cols];
@@ -31,20 +37,15 @@ public class AARService {
     	}
     	return ascii;
     }
-    public void processVideoStream(VideoCapture camera, int scale_y, int scale_x, int diffScale) {
+    public void processVideoStream(VideoCapture camera, int scale_y, int scale_x, int diffScale, boolean fpsToggle) {
     	if(!camera.isOpened()) throw new RuntimeException("Camera is not Opened");
     	int x = -1;
     	Mat frame = new Mat();
     	Mat grayFrame = new Mat();
     	Mat resizedFrame = new Mat();
     	Mat display = new Mat();
-		FPSCounter fpsCounter = new FPSCounter();
+		if(!fpsToggle) {fpsCounter = new FPSCounter();}
     	
-    	int fontFace = opencv_imgproc.FONT_HERSHEY_SIMPLEX;
-	    double fontScale = 0.1;
-	    Scalar fontColor = new Scalar(255, 255, 255, 0);
-	    int thickness = 1;
-	    int lineType = opencv_imgproc.LINE_8;
 		while(!camera.read(frame)) continue;
 	    
     	while(camera.read(frame) && !frame.empty()) {
@@ -57,8 +58,10 @@ public class AARService {
     				opencv_imgproc.putText(display, String.valueOf(result[i][j]), new Point(j*diffScale, i*diffScale), fontFace, fontScale, fontColor, thickness, lineType, false);
     			}
     		}
-			double fps = fpsCounter.getFPS(System.nanoTime());
-			opencv_imgproc.putText(display, String.format("FPS : %f", fps), new Point(10, 30), fontFace, fontScale*8, fontColor);
+			if(!fpsToggle) {
+				double fps = fpsCounter.getFPS(System.nanoTime());
+				opencv_imgproc.putText(display, String.format("FPS : %f", fps), new Point(10, 30), fontFace, fontScale*8, fontColor);
+			}
     		opencv_highgui.imshow("ascii_stream", display);
     		x = opencv_highgui.waitKey(1);
     		if(x!=-1) break;
@@ -101,11 +104,6 @@ public class AARService {
     	int x = -1;
     	int diffScale = 5;
     	
-    	int fontFace = opencv_imgproc.FONT_HERSHEY_SIMPLEX;
-	    double fontScale = 0.1;
-	    Scalar fontColor = new Scalar(255, 255, 255, 0);
-	    int thickness = 1;
-	    int lineType = opencv_imgproc.LINE_8;
 		for(char[][] frame : processedObject) {
 			Mat display = new Mat(scale_y*diffScale, scale_x*diffScale, opencv_core.CV_8UC1, new Scalar(0,0,0,0));
     		for(int i=0;i<scale_y;i++) {
