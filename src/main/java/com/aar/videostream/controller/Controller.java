@@ -5,8 +5,8 @@ import java.util.ArrayList;
 
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,14 +14,18 @@ import com.aar.videostream.service.AARService;
 
 @RestController
 public class Controller {
-	@Autowired AARService aarService;
+	final AARService aarService;
+
+	Controller(AARService aarService) {
+		this.aarService = aarService;
+	}
 	
-	@GetMapping("/realtime")
-	public Object realtime() throws InterruptedException {
+	@GetMapping("/realtime/{diffScale}")
+	public Object realtime(@PathVariable("diffScale") int diffScale) throws InterruptedException {
 		VideoCapture vidCap = new VideoCapture(0);
 		try {
 			while(!vidCap.isOpened()) continue;
-			aarService.processVideoStream(vidCap, 50, 50);
+			aarService.processVideoStream(vidCap, 50, 50, diffScale);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -34,7 +38,7 @@ public class Controller {
 		VideoCapture vidCap = new VideoCapture(vidPath);
 		try {
 			while(!vidCap.isOpened()) continue;
-			aarService.processVideoStream(vidCap, 100, 200);
+			aarService.processVideoStream(vidCap, 100, 200, 5);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {

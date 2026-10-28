@@ -1,6 +1,5 @@
 package com.aar.videostream.service;
 
-import java.io.File;
 import java.util.ArrayList;
 
 import org.bytedeco.javacpp.indexer.UByteIndexer;
@@ -32,14 +31,14 @@ public class AARService {
     	}
     	return ascii;
     }
-    public void processVideoStream(VideoCapture camera, int scale_y, int scale_x) {
+    public void processVideoStream(VideoCapture camera, int scale_y, int scale_x, int diffScale) {
     	if(!camera.isOpened()) throw new RuntimeException("Camera is not Opened");
     	int x = -1;
-    	int diffScale = 5;
     	Mat frame = new Mat();
     	Mat grayFrame = new Mat();
     	Mat resizedFrame = new Mat();
     	Mat display = new Mat();
+		FPSCounter fpsCounter = new FPSCounter();
     	
     	int fontFace = opencv_imgproc.FONT_HERSHEY_SIMPLEX;
 	    double fontScale = 0.1;
@@ -58,6 +57,8 @@ public class AARService {
     				opencv_imgproc.putText(display, String.valueOf(result[i][j]), new Point(j*diffScale, i*diffScale), fontFace, fontScale, fontColor, thickness, lineType, false);
     			}
     		}
+			double fps = fpsCounter.getFPS(System.nanoTime());
+			opencv_imgproc.putText(display, String.format("FPS : %f", fps), new Point(10, 30), fontFace, fontScale*8, fontColor);
     		opencv_highgui.imshow("ascii_stream", display);
     		x = opencv_highgui.waitKey(1);
     		if(x!=-1) break;
@@ -69,7 +70,6 @@ public class AARService {
     public ArrayList<char[][]> processVideoObject(VideoCapture camera, int scale_y, int scale_x) {
     	if(!camera.isOpened()) throw new RuntimeException("Camera is not Opened");
     	int x = -1;
-    	int diffScale = 5;
     	ArrayList<char[][]> response = new ArrayList<>();
     	Mat frame = new Mat();
     	Mat grayFrame = new Mat();
