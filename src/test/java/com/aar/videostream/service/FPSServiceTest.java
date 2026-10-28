@@ -11,7 +11,6 @@ class FPSServiceTest {
     @BeforeEach
     void setUp() throws InterruptedException {
         fpsCounter = new FPSCounter();
-        fpsCounter.init();
     }
 
     @Test
