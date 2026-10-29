@@ -5,7 +5,6 @@ import java.util.ArrayList;
 
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,27 +13,19 @@ import com.aar.videostream.service.AARService;
 
 @RestController
 public class Controller {
-	@Autowired AARService aarService;
-	
-	@GetMapping("/realtime")
-	public Object realtime() throws InterruptedException {
-		VideoCapture vidCap = new VideoCapture(0);
-		try {
-			while(!vidCap.isOpened()) continue;
-			aarService.processVideoStream(vidCap, 50, 50);
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			vidCap.release();
-		}
-		return null;
+	final AARService aarService;
+	final boolean fpsToggleDefault = true;
+
+	Controller(AARService aarService) {
+		this.aarService = aarService;
 	}
+	
 	@GetMapping("/stream")
 	public void vidStream(@RequestParam("file") String vidPath) {
 		VideoCapture vidCap = new VideoCapture(vidPath);
 		try {
 			while(!vidCap.isOpened()) continue;
-			aarService.processVideoStream(vidCap, 100, 200);
+			aarService.processVideoStream(vidCap, 100, 200, 5, fpsToggleDefault);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
